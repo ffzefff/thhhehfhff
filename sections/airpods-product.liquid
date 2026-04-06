@@ -1,0 +1,345 @@
+{% assign current_product = product %}
+
+<div class="airpods-page" id="airpods-product-page">
+
+  <!-- SECTION 1 — HERO -->
+  <section class="ap-hero">
+    <div class="ap-container ap-hero__inner">
+
+      <div class="ap-gallery">
+        <div class="ap-gallery__main">
+          <img src="{{ current_product.featured_image | img_url: '800x800' }}" alt="{{ current_product.title }}" id="ap-main-img" loading="eager"/>
+          <div class="ap-gallery__badge">Qualité Premium</div>
+        </div>
+        <div class="ap-gallery__thumbs">
+          {% for image in current_product.images limit: 5 %}
+            <div class="ap-gallery__thumb {% if forloop.first %}active{% endif %}"
+                 onclick="document.getElementById('ap-main-img').src='{{ image | img_url: '800x800' }}'; this.parentElement.querySelectorAll('.ap-gallery__thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active')">
+              <img src="{{ image | img_url: '120x120', crop: 'center' }}" alt="Vue {{ forloop.index }}" loading="lazy"/>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="ap-buy-box">
+        <div class="ap-stars">
+          <span class="ap-stars__icons">★★★★★</span>
+          <span class="ap-stars__count">4.9 / 5 — <a href="#ap-reviews">{{ section.settings.review_count }} avis</a></span>
+        </div>
+
+        <h1 class="ap-buy-box__title">{{ current_product.title }}</h1>
+        <p class="ap-buy-box__hook">Le casque qui transforme chaque écoute en expérience. Réduction de bruit active, son spatial, autonomie 20h.</p>
+
+        <div class="ap-price">
+          {% if current_product.compare_at_price > current_product.price %}
+            <span class="ap-price__original">{{ current_product.compare_at_price | money }}</span>
+            <span class="ap-price__current">{{ current_product.price | money }}</span>
+            <span class="ap-price__saving">-{{ current_product.compare_at_price | minus: current_product.price | money }} ({{ current_product.compare_at_price | minus: current_product.price | times: 100 | divided_by: current_product.compare_at_price | round }}%)</span>
+          {% else %}
+            <span class="ap-price__current">{{ current_product.price | money }}</span>
+          {% endif %}
+        </div>
+
+        <div class="ap-countdown">
+          <span class="ap-countdown__label">🔥 Offre se termine dans :</span>
+          <span class="ap-countdown__timer" id="ap-countdown">--:--:--</span>
+        </div>
+
+        <div class="ap-stock">
+          <div class="ap-stock__bar"><div class="ap-stock__fill" style="width: {{ section.settings.stock_percent }}%"></div></div>
+          <p class="ap-stock__text">⚡ Plus que <strong>{{ section.settings.stock_qty }} unités</strong> en stock !</p>
+        </div>
+
+        {% unless current_product.has_only_default_variant %}
+          <div class="ap-variants">
+            <p class="ap-variants__label">Couleur : <strong id="ap-selected-variant">{{ current_product.selected_or_first_available_variant.option1 }}</strong></p>
+            <div class="ap-variants__options">
+              {% for variant in current_product.variants %}
+                <button class="ap-variant-btn {% if forloop.first %}active{% endif %}"
+                        data-variant-id="{{ variant.id }}"
+                        data-price="{{ variant.price | money }}"
+                        onclick="selectVariant(this, '{{ variant.option1 }}', '{{ variant.price | money }}')">
+                  {{ variant.option1 }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endunless %}
+
+        <form action="/cart/add" method="post" id="ap-product-form">
+          <input type="hidden" name="id" value="{{ current_product.selected_or_first_available_variant.id }}" id="ap-variant-id"/>
+          <input type="hidden" name="quantity" value="1"/>
+          <button type="submit" class="ap-btn ap-btn--primary" id="ap-add-to-cart">🛒 Ajouter au panier — {{ current_product.price | money }}</button>
+          <button type="button" class="ap-btn ap-btn--secondary" onclick="window.location='/checkout'">⚡ Acheter maintenant</button>
+        </form>
+
+        <div class="ap-micro-trust">
+          <span>🔒 Paiement sécurisé</span>
+          <span>🚚 Livraison offerte dès 50€</span>
+          <span>↩️ Retours 30 jours</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2 — RÉASSURANCE -->
+  <section class="ap-trust-bar">
+    <div class="ap-container ap-trust-bar__inner">
+      <div class="ap-trust-item"><span class="ap-trust-icon">🚚</span><div><strong>Livraison rapide</strong><p>Expédition sous 24–48h</p></div></div>
+      <div class="ap-trust-item"><span class="ap-trust-icon">🔒</span><div><strong>Paiement sécurisé</strong><p>CB · PayPal · Apple Pay</p></div></div>
+      <div class="ap-trust-item"><span class="ap-trust-icon">↩️</span><div><strong>Retours 30 jours</strong><p>Satisfait ou remboursé</p></div></div>
+      <div class="ap-trust-item"><span class="ap-trust-icon">💬</span><div><strong>SAV disponible</strong><p>Réponse en moins de 24h</p></div></div>
+    </div>
+  </section>
+
+  <!-- SECTION 3 — FEATURES -->
+  <section class="ap-features">
+    <div class="ap-container">
+      <h2 class="ap-section-title">Pourquoi vous allez l'adorer</h2>
+      <div class="ap-features__grid">
+        <div class="ap-feature-card"><div class="ap-feature-card__icon">🎵</div><h3>Son Haute Fidélité</h3><p>Drivers 40mm pour des basses profondes, des médiums chauds et des aigus cristallins.</p></div>
+        <div class="ap-feature-card"><div class="ap-feature-card__icon">🔇</div><h3>Réduction de Bruit Active</h3><p>Isolation phonique avancée pour vous couper du monde dans les transports ou au bureau.</p></div>
+        <div class="ap-feature-card"><div class="ap-feature-card__icon">🏆</div><h3>Design Iconique Apple</h3><p>Aluminium anodisé, arceau acier inoxydable, coussinets mémoire de forme.</p></div>
+        <div class="ap-feature-card"><div class="ap-feature-card__icon">⚡</div><h3>20h d'Autonomie</h3><p>10 min de recharge = 1h30 d'écoute. Ne vous arrêtez jamais.</p></div>
+        <div class="ap-feature-card"><div class="ap-feature-card__icon">📱</div><h3>Compatible Tous Appareils</h3><p>Bluetooth 5.0 universel. iPhone, Android, PC, Mac. Jusqu'à 15m de portée.</p></div>
+        <div class="ap-feature-card"><div class="ap-feature-card__icon">🎙️</div><h3>Micro Crystal Clear</h3><p>Appels et visios limpides grâce à la réduction du bruit ambiant intégrée.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4 — DESCRIPTION + SPECS -->
+  <section class="ap-desc">
+    <div class="ap-container ap-desc__inner">
+      <div class="ap-desc__text">
+        <h2 class="ap-section-title">L'expérience sonore que vous méritez</h2>
+        <p>Imaginez enfiler votre casque le matin, fermer les yeux, et entrer dans votre bulle — sans distractions, sans compromis sur la qualité.</p>
+        <p>Que vous travailliez, vous entraîniez ou voyagiez, il s'adapte à votre rythme. Léger, confortable, élégant. Un accessoire premium qui dit qui vous êtes.</p>
+        <p>Et pour un prix qui ne vous force pas à choisir entre qualité et budget — c'est le meilleur des deux mondes.</p>
+        <div class="ap-faq">
+          <div class="ap-faq__item">
+            <button class="ap-faq__q" onclick="this.parentElement.classList.toggle('open')">Compatible iPhone / Android ? <span>+</span></button>
+            <p class="ap-faq__a">Oui, totalement universel via Bluetooth 5.0. Fonctionne avec tous les smartphones, tablettes et ordinateurs.</p>
+          </div>
+          <div class="ap-faq__item">
+            <button class="ap-faq__q" onclick="this.parentElement.classList.toggle('open')">Quelle qualité audio réelle ? <span>+</span></button>
+            <p class="ap-faq__a">Drivers 40mm hautes performances, réponse 20Hz–20kHz. Remarquable pour cette gamme de prix.</p>
+          </div>
+          <div class="ap-faq__item">
+            <button class="ap-faq__q" onclick="this.parentElement.classList.toggle('open')">Livraison en combien de temps ? <span>+</span></button>
+            <p class="ap-faq__a">Expédition sous 24h ouvrées. Délai de livraison : 3 à 7 jours. Suivi inclus.</p>
+          </div>
+        </div>
+      </div>
+      <div class="ap-specs">
+        <h3>Fiche technique</h3>
+        <table class="ap-specs__table">
+          <tr><td>Connectivité</td><td>Bluetooth 5.0</td></tr>
+          <tr><td>Drivers</td><td>40mm haute définition</td></tr>
+          <tr><td>Réponse freq.</td><td>20Hz – 20 000Hz</td></tr>
+          <tr><td>Autonomie</td><td>Jusqu'à 20 heures</td></tr>
+          <tr><td>Recharge</td><td>USB-C / 10 min = 1h30</td></tr>
+          <tr><td>Portée</td><td>15 mètres</td></tr>
+          <tr><td>Poids</td><td>385g</td></tr>
+          <tr><td>Compatibilité</td><td>iOS · Android · Windows · Mac</td></tr>
+          <tr><td>Micro</td><td>Intégré avec réduction bruit</td></tr>
+          <tr><td>Couleurs</td><td>Minuit · Lumière stellaire · Bleu ciel · Rose</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5 — AVIS CLIENTS -->
+  <section class="ap-reviews" id="ap-reviews">
+    <div class="ap-container">
+      <div class="ap-reviews__header">
+        <h2 class="ap-section-title">Ce que disent nos clients</h2>
+        <div class="ap-reviews__score">
+          <span class="ap-reviews__big-note">4.9</span>
+          <div><span class="ap-stars__icons">★★★★★</span><p>{{ section.settings.review_count }} avis vérifiés</p></div>
+        </div>
+      </div>
+      <div class="ap-reviews__grid">
+        <div class="ap-review-card">
+          <div class="ap-review-card__top"><span class="ap-review-card__stars">★★★★★</span><span class="ap-review-card__name">Marie L. ✅</span></div>
+          <p class="ap-review-card__title">Bluffant pour le prix !</p>
+          <p>"Je ne m'attendais pas à une telle qualité. Le son est vraiment excellent, la réduction de bruit marche super bien."</p>
+        </div>
+        <div class="ap-review-card">
+          <div class="ap-review-card__top"><span class="ap-review-card__stars">★★★★★</span><span class="ap-review-card__name">Thomas R. ✅</span></div>
+          <p class="ap-review-card__title">Design identique, son premium</p>
+          <p>"Impossible de le distinguer visuellement des vrais AirPods Max. Dans les transports en commun, c'est parfait."</p>
+        </div>
+        <div class="ap-review-card">
+          <div class="ap-review-card__top"><span class="ap-review-card__stars">★★★★★</span><span class="ap-review-card__name">Julie M. ✅</span></div>
+          <p class="ap-review-card__title">Cadeau parfait !</p>
+          <p>"Offert à mon copain pour son anniversaire. Il l'utilise tous les jours au boulot. Tout le monde croit que c'est l'original !"</p>
+        </div>
+      </div>
+      <div class="ap-reviews__cta">
+        <p>Rejoignez plus de {{ section.settings.review_count }} clients satisfaits</p>
+        <a href="#ap-product-form" class="ap-btn ap-btn--primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;max-width:360px;margin:0 auto">🛒 Je veux le mien maintenant</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6 — UPSELL -->
+  <section class="ap-upsell">
+    <div class="ap-container">
+      <h2 class="ap-section-title">Complétez votre expérience audio</h2>
+      <p class="ap-upsell__sub">Souvent achetés ensemble</p>
+      <div class="ap-upsell__grid">
+        {% assign upsell_collection = collections[section.settings.upsell_collection] %}
+        {% for p in upsell_collection.products limit: 3 %}
+          <div class="ap-upsell-card">
+            <a href="{{ p.url }}"><img src="{{ p.featured_image | img_url: '300x300', crop: 'center' }}" alt="{{ p.title }}" loading="lazy"/></a>
+            <div class="ap-upsell-card__info">
+              <p class="ap-upsell-card__name">{{ p.title }}</p>
+              <p class="ap-upsell-card__price">{{ p.price | money }}</p>
+              <a href="{{ p.url }}" class="ap-btn ap-btn--small">Voir le produit</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<style>
+.airpods-page *{box-sizing:border-box;margin:0;padding:0}
+.ap-container{max-width:1200px;margin:0 auto;padding:0 20px}
+.ap-hero{padding:40px 0;background:#fff}
+.ap-hero__inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+@media(max-width:768px){.ap-hero__inner{grid-template-columns:1fr;gap:30px}}
+.ap-gallery__main{position:relative;border-radius:12px;overflow:hidden;background:#f7f7f7}
+.ap-gallery__main img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
+.ap-gallery__badge{position:absolute;top:16px;left:16px;background:#000;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:50px}
+.ap-gallery__thumbs{display:flex;gap:10px;margin-top:12px}
+.ap-gallery__thumb{width:70px;height:70px;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;flex-shrink:0}
+.ap-gallery__thumb.active,.ap-gallery__thumb:hover{border-color:#000}
+.ap-gallery__thumb img{width:100%;height:100%;object-fit:cover}
+.ap-buy-box{padding-top:8px}
+.ap-stars{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ap-stars__icons{color:#f5a623;font-size:18px;letter-spacing:2px}
+.ap-stars__count{font-size:14px;color:#555}
+.ap-stars__count a{color:#333;text-decoration:underline}
+.ap-buy-box__title{font-size:clamp(22px,3vw,30px);font-weight:700;color:#111;line-height:1.2;margin-bottom:12px}
+.ap-buy-box__hook{font-size:16px;color:#555;line-height:1.6;margin-bottom:20px;border-left:3px solid #000;padding-left:14px}
+.ap-price{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.ap-price__original{font-size:18px;color:#999;text-decoration:line-through}
+.ap-price__current{font-size:32px;font-weight:800;color:#111}
+.ap-price__saving{background:#ff3b30;color:#fff;font-size:13px;font-weight:700;padding:4px 12px;border-radius:50px}
+.ap-countdown{display:flex;align-items:center;gap:10px;background:#fff8f0;border:1px solid #f5c06a;border-radius:8px;padding:10px 16px;margin-bottom:16px}
+.ap-countdown__label{font-size:14px;color:#b45309;font-weight:500}
+.ap-countdown__timer{font-size:20px;font-weight:800;color:#b45309;font-variant-numeric:tabular-nums}
+.ap-stock{margin-bottom:20px}
+.ap-stock__bar{width:100%;height:8px;background:#eee;border-radius:50px;overflow:hidden;margin-bottom:8px}
+.ap-stock__fill{height:100%;background:#ff3b30;border-radius:50px}
+.ap-stock__text{font-size:13px;color:#c0392b}
+.ap-variants{margin-bottom:20px}
+.ap-variants__label{font-size:14px;color:#555;margin-bottom:10px}
+.ap-variants__options{display:flex;gap:8px;flex-wrap:wrap}
+.ap-variant-btn{padding:8px 18px;border:2px solid #ddd;border-radius:8px;font-size:14px;cursor:pointer;background:#fff;transition:all .15s}
+.ap-variant-btn:hover,.ap-variant-btn.active{border-color:#000;background:#000;color:#fff}
+.ap-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px 24px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;border:none;transition:all .15s;text-align:center}
+.ap-btn--primary{background:#000;color:#fff;margin-bottom:12px}
+.ap-btn--primary:hover{background:#222;transform:translateY(-1px)}
+.ap-btn--secondary{background:#fff;color:#000;border:2px solid #000}
+.ap-btn--secondary:hover{background:#f5f5f5}
+.ap-btn--small{background:#000;color:#fff;padding:10px 18px;font-size:14px;font-weight:600;border-radius:8px;text-decoration:none;display:inline-flex;width:auto}
+.ap-micro-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.ap-micro-trust span{font-size:12px;color:#555;background:#f5f5f5;padding:6px 12px;border-radius:50px}
+.ap-trust-bar{background:#f9f9f9;border-top:1px solid #eee;border-bottom:1px solid #eee;padding:24px 0}
+.ap-trust-bar__inner{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:600px){.ap-trust-bar__inner{grid-template-columns:repeat(2,1fr)}}
+.ap-trust-item{display:flex;align-items:center;gap:12px}
+.ap-trust-icon{font-size:24px;flex-shrink:0}
+.ap-trust-item strong{font-size:14px;color:#111;display:block;margin-bottom:2px}
+.ap-trust-item p{font-size:12px;color:#777;margin:0}
+.ap-features{padding:70px 0;background:#fff}
+.ap-section-title{font-size:clamp(22px,3vw,32px);font-weight:800;color:#111;text-align:center;margin-bottom:40px}
+.ap-features__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:768px){.ap-features__grid{grid-template-columns:1fr}}
+.ap-feature-card{background:#f9f9f9;border-radius:14px;padding:28px 24px;text-align:center;transition:transform .2s}
+.ap-feature-card:hover{transform:translateY(-4px)}
+.ap-feature-card__icon{font-size:36px;margin-bottom:16px;display:block}
+.ap-feature-card h3{font-size:17px;font-weight:700;color:#111;margin-bottom:10px}
+.ap-feature-card p{font-size:14px;color:#666;line-height:1.6}
+.ap-desc{padding:70px 0;background:#f9f9f9}
+.ap-desc__inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+@media(max-width:768px){.ap-desc__inner{grid-template-columns:1fr}}
+.ap-desc__text .ap-section-title{text-align:left}
+.ap-desc__text p{font-size:16px;color:#444;line-height:1.8;margin-bottom:16px}
+.ap-faq{margin-top:30px}
+.ap-faq__item{border-bottom:1px solid #ddd}
+.ap-faq__q{width:100%;background:none;border:none;font-size:15px;font-weight:600;color:#111;padding:16px 0;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.ap-faq__q span{font-size:20px;color:#999;transition:transform .2s}
+.ap-faq__item.open .ap-faq__q span{transform:rotate(45deg)}
+.ap-faq__a{display:none;font-size:14px;color:#555;line-height:1.6;padding-bottom:16px}
+.ap-faq__item.open .ap-faq__a{display:block}
+.ap-specs{background:#fff;border-radius:14px;padding:28px 24px}
+.ap-specs h3{font-size:18px;font-weight:700;color:#111;margin-bottom:20px}
+.ap-specs__table{width:100%;border-collapse:collapse}
+.ap-specs__table tr{border-bottom:1px solid #eee}
+.ap-specs__table td{padding:12px 8px;font-size:14px}
+.ap-specs__table td:first-child{color:#777;width:45%}
+.ap-specs__table td:last-child{font-weight:600;color:#111}
+.ap-reviews{padding:70px 0;background:#fff}
+.ap-reviews__header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;flex-wrap:wrap;gap:16px}
+.ap-reviews__score{display:flex;align-items:center;gap:12px}
+.ap-reviews__big-note{font-size:48px;font-weight:800;color:#111}
+.ap-reviews__score p{font-size:14px;color:#777;margin-top:4px}
+.ap-reviews__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px}
+@media(max-width:768px){.ap-reviews__grid{grid-template-columns:1fr}}
+.ap-review-card{background:#f9f9f9;border-radius:14px;padding:24px}
+.ap-review-card__top{display:flex;justify-content:space-between;margin-bottom:12px}
+.ap-review-card__stars{color:#f5a623;font-size:16px}
+.ap-review-card__name{font-size:13px;color:#555}
+.ap-review-card__title{font-size:15px;font-weight:700;color:#111;margin-bottom:8px}
+.ap-review-card p:last-child{font-size:14px;color:#555;line-height:1.6;font-style:italic}
+.ap-reviews__cta{text-align:center}
+.ap-reviews__cta p{font-size:16px;color:#555;margin-bottom:16px}
+.ap-upsell{padding:70px 0;background:#f9f9f9}
+.ap-upsell__sub{text-align:center;color:#777;font-size:15px;margin-top:-30px;margin-bottom:40px}
+.ap-upsell__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:768px){.ap-upsell__grid{grid-template-columns:1fr}}
+.ap-upsell-card{background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee}
+.ap-upsell-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.ap-upsell-card__info{padding:16px}
+.ap-upsell-card__name{font-size:15px;font-weight:600;color:#111;margin-bottom:6px}
+.ap-upsell-card__price{font-size:16px;font-weight:800;color:#111;margin-bottom:12px}
+</style>
+
+<script>
+(function(){
+  var endTime=new Date();
+  endTime.setHours(endTime.getHours()+3,endTime.getMinutes()+47,0,0);
+  function tick(){
+    var diff=endTime-new Date();
+    if(diff<=0){document.getElementById('ap-countdown').textContent='Terminée';return;}
+    var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    document.getElementById('ap-countdown').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  tick();setInterval(tick,1000);
+})();
+
+function selectVariant(btn,name,price){
+  btn.parentElement.querySelectorAll('.ap-variant-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('ap-selected-variant').textContent=name;
+  document.getElementById('ap-variant-id').value=btn.dataset.variantId;
+  document.getElementById('ap-add-to-cart').textContent='🛒 Ajouter au panier — '+price;
+}
+</script>
+
+{% schema %}
+{
+  "name": "AirPods Max produit",
+  "settings": [
+    { "type": "number", "id": "review_count", "label": "Nombre d'avis affiché", "default": 347 },
+    { "type": "number", "id": "stock_percent", "label": "Barre stock restant %", "default": 23 },
+    { "type": "number", "id": "stock_qty", "label": "Quantité stock affichée", "default": 7 },
+    { "type": "collection", "id": "upsell_collection", "label": "Collection upsell" }
+  ]
+}
+{% endschema %}
